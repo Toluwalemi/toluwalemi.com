@@ -4,6 +4,7 @@ title = "My Reading List"
 
 # Currently Reading
 -  Fourth Wing *by Rebecca Yarros*
+-  Dream Count *by Chimamanda Ngozi Adichie*
 
 # 2025
 - **February** - Children of Anguish and Anarchy  *by Tomi Adeyemi*
