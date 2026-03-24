@@ -24,7 +24,7 @@
   }
 
   // --- Konami code easter egg (matrix rain) ---
-  var konamiSeq = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
+  var konamiSeq = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
   var konamiPos = 0;
 
   document.addEventListener("keydown", function (e) {
@@ -76,7 +76,7 @@
 
     var interval = setInterval(draw, 40);
 
-    // Stop after 6 seconds
+    // Stop after 3 seconds
     setTimeout(function () {
       clearInterval(interval);
       canvas.style.transition = "opacity 1s";
