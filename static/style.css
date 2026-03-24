@@ -39,6 +39,10 @@ body {
   color: var(--soft-text-dark);
 }
 
+.dark-theme a.read-more {
+  background: none;
+}
+
 .dark-theme .post:not(:last-of-type),
 .dark-theme .archive__group-month:not(:last-of-type),
 .dark-theme .archive__post:not(:last-of-type),
@@ -631,4 +635,40 @@ h1.post-title:hover {
 .dark-theme h1.post-title:hover {
   color: #9bb7ff;
   text-shadow: 0 0 5px rgba(155, 183, 255, 0.5);
+}
+
+/* === 6. Main Content Distinct Background (Card Effect) === */
+.post, .archive, .terms, .projects-page {
+  background-color: #ffffff;
+  border: 1px solid #e8e8e4;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  padding: 30px;
+  margin-bottom: 30px !important;
+}
+
+.home-intro {
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.dark-theme .post, 
+.dark-theme .archive, 
+.dark-theme .terms, 
+.dark-theme .projects-page {
+  background-color: var(--soft-surface-dark);
+  border-color: #31353c;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dark-theme .home-intro {
+  background-color: var(--soft-surface-dark);
+}
+
+@media (max-width: 683px) {
+  .post, .archive, .terms, .projects-page, .home-intro {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px !important;
+  }
 }

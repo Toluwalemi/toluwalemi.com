@@ -8,6 +8,7 @@
 /public/
 /resources/_gen/
 .idea/
+.claude/
 __pycache__/
 # executable may be added to repository
 hugo.exe
