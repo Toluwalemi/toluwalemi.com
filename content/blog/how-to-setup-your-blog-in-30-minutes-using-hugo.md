@@ -1,7 +1,7 @@
 +++
 banner = ""
 date = 2020-07-02T12:00:00Z
-description = "Hugo can be used for free to create, transform, and manage your blog in a short time."
+description = "Step-by-step tutorial on how to set up a Hugo blog in 30 minutes, from installation to theme setup and publishing your first technical article."
 tags = ["Hugo", "Web Development"]
 title = "How to setup your blog in 30 minutes using Hugo"
 

@@ -1,7 +1,7 @@
 +++
 banner = ""
 date = 2020-06-25T12:50:00Z
-description = "My inner voice has been wailing all these years to do this. I'm really excited to embark on this new route I haven't trodden before."
+description = "Toluwalemi shares his software engineering journey, lessons from starting and restarting, and why this backend engineering blog was launched with Hugo."
 tags = ["Journey", "General"]
 title = "The Journey: Getting Started"
 

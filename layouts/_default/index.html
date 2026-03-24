@@ -8,6 +8,49 @@
   {{ end }}
   {{ $paginator := .Paginate (where $PageContext.RegularPages "Type" $contentTypeName) }}
 
+  {{ if .IsHome }}
+    <section class="home-intro">
+      <p class="home-kicker">toluwalemi.dev // est. 2020</p>
+      <p class="home-status">[ system ] backend + ai engineering // open to collaboration</p>
+      <h1 class="home-title">Hi, I’m Toluwalemi.</h1>
+      <p class="home-summary">
+        Backend Engineer with 5+ years building production systems with Python, Django, and AWS.
+        I solve real business problems with intelligent systems and now focus on AI Engineering with RAG pipelines,
+        LLMs, embeddings, and vector databases.
+        I’m also an MBA candidate in Operations Management, exploring how technology and strategy improve organizations.
+        I’m building Lemitek and PyWhisperer to make Python and AI learning personalized and practical.
+      </p>
+      <div class="home-tags" aria-label="Areas of focus">
+        <span class="home-tag">python</span>
+        <span class="home-tag">django</span>
+        <span class="home-tag">aws</span>
+        <span class="home-tag">ai engineering</span>
+        <span class="home-tag">rag</span>
+        <span class="home-tag">llms</span>
+        <span class="home-tag">vector databases</span>
+      </div>
+    </section>
+
+    <section class="home-nav-grid" aria-label="Primary navigation">
+      <a class="home-card" href="/blog/">
+        <h2>Blog</h2>
+        <p>Articles and notes on software engineering, backend systems, and learning in public.</p>
+      </a>
+      <a class="home-card" href="/reading/">
+        <h2>Reading List</h2>
+        <p>Books I’m currently reading and a running archive of titles by year.</p>
+      </a>
+      <a class="home-card" href="/projects/">
+        <h2>Projects</h2>
+        <p>A curated list of GitHub projects, experiments, and technical builds.</p>
+      </a>
+    </section>
+
+    <section class="home-section-heading">
+      <h2>Recent posts</h2>
+    </section>
+  {{ end }}
+
   <div class="posts">
     {{ range $paginator.Pages }}
     <div class="post on-list">

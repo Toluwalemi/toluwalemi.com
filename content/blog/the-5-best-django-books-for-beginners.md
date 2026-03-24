@@ -1,7 +1,7 @@
 +++
 banner = ""
 date = 2020-11-17T11:06:00Z
-description = "If you are a beginner looking to speed up your learning pathway effectively and efficiently, you should study these books in the following order..."
+description = "A practical backend engineering reading guide: the best Django books for beginners, ordered to help you learn Django and build production-ready web applications."
 tags = ["Django", "Web Development"]
 title = "The 5 Best Django Books for Beginners"
 

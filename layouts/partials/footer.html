@@ -3,13 +3,12 @@
     {{ if $.Site.Copyright }}
       <div class="copyright copyright--user">{{ $.Site.Copyright | safeHTML }}</div>
     {{else}}
-      <a href="http://www.toluwalemi.com/">Toluwalemi</a>
+      <a href="/">Toluwalemi</a>
       <div class="copyright">
         <span>© {{ now.Year }} Toluwalemi</span>
-        <a class="mx-2" href="https://twitter.com/toluwalemi"><i class="fab fa-twitter"></i></a><a class="mx-2"
-                                                                                                   href="https://www.linkedin.com/in/toluwalemioluwadare/"><i
-            class="fab fa-linkedin"></i></a><a class="mx-2" href="https://github.com/Toluwalemi"><i
-            class="fab fa-github"></i></a>
+        <a class="social-link" href="https://x.com/toluwalemi" aria-label="Toluwalemi on X">X</a>
+        <a class="social-link" href="https://www.linkedin.com/in/toluwalemioluwadare/" aria-label="Toluwalemi on LinkedIn">LinkedIn</a>
+        <a class="social-link" href="https://github.com/Toluwalemi" aria-label="Toluwalemi on GitHub">GitHub</a>
       </div>
     {{end}}
   </div>

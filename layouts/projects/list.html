@@ -1,0 +1,38 @@
+{{ define "main" }}
+  <section class="projects-page">
+    <h1 class="projects-title">{{ .Title }}</h1>
+    {{ with .Params.description }}
+      <p class="projects-description">{{ . }}</p>
+    {{ end }}
+
+    <div class="projects-grid">
+      {{ range .Pages.ByDate.Reverse }}
+        <article class="project-card">
+          <h2 class="project-title">{{ .Title }}</h2>
+          {{ with .Params.status }}
+            <p class="project-status">status: {{ . }}</p>
+          {{ end }}
+          {{ with .Description }}
+            <p class="project-description">{{ . }}</p>
+          {{ end }}
+          {{ with .Params.stack }}
+            <ul class="project-stack">
+              {{ range . }}
+                <li>{{ . }}</li>
+              {{ end }}
+            </ul>
+          {{ end }}
+          <div class="project-links">
+            <a href="{{ .RelPermalink }}">Details</a>
+            {{ with .Params.github }}
+              <a href="{{ . }}">GitHub</a>
+            {{ end }}
+            {{ with .Params.live }}
+              <a href="{{ . }}">Live</a>
+            {{ end }}
+          </div>
+        </article>
+      {{ end }}
+    </div>
+  </section>
+{{ end }}

@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta
   name="description"
-  content="{{ if .IsHome }}{{ $.Site.Params.Subtitle }}{{ else }}{{ .Summary | plainify }}{{ end }}"
+  content="{{ if .IsHome }}Toluwalemi Oluwadare is a Software Engineer and Backend Engineer focused on Python, Django, AWS, DevOps, and AI Engineering. Explore articles, projects, and technical insights.{{ else }}{{ with .Description }}{{ . | plainify }}{{ else }}{{ .Summary | plainify }}{{ end }}{{ end }}"
 />
 <meta
   name="keywords"

@@ -1,7 +1,7 @@
 +++
 banner = ""
 date = 2020-08-27T15:35:00Z
-description = "You've put in the effort to setup your blog with Hugo, so it's time to make sure your audience sees your articles."
+description = "Learn how to deploy a Hugo blog on Netlify so your software engineering articles can be indexed, discovered, and reliably served to readers."
 tags = ["Netlify", "Hugo", "Web Development"]
 title = "Deploy your Hugo website using Netlify"
 

@@ -6,12 +6,13 @@ paginate = 10
 [params]
   # dir name of your blog content (default is `content/posts`)
   contentTypeName = "blog"
+  keywords = "Toluwalemi, Toluwalemi Oluwadare, Software Engineer, Backend Engineer, AI Engineer, Python Developer, Django, AWS, DevOps"
 
   # "light" or "dark"
-  defaultTheme = "dark"
+  defaultTheme = "light"
 
   # if you set this to 0, only submenu trigger will be visible
-  showMenuItems = 2
+  showMenuItems = 4
 
   # Show reading time in minutes for posts
   showReadingTime = true
@@ -33,8 +34,8 @@ paginate = 10
 [languages]
   [languages.en]
     title = "Toluwalemi"
-    subtitle = "BLOG"
-    keywords = "Toluwalemi, Tolu, Toluwalemi Oluwadare, Toluwalemi's Blog"
+    subtitle = "Software Engineer and Backend Engineer specializing in Python, Django, AWS, and AI Engineering"
+    keywords = "Toluwalemi, Toluwalemi Oluwadare, Software Engineer, Backend Engineer, AI Engineer, Python, Django, AWS, DevOps, RAG, LLMs"
     copyright = ""
     menuMore = "Show more"
     writtenBy = ""
@@ -49,7 +50,7 @@ paginate = 10
     lastModDisplay = "Last Updated:"
 
     [languages.en.params.logo]
-      logoText = "BLOG"
+      logoText = "Toluwalemi"
       logoHomeLink = "/"
     # or
     #
@@ -58,10 +59,18 @@ paginate = 10
 
     [languages.en.menu]
       [[languages.en.menu.main]]
-        identifier = "about"
-        name = "About"
+        identifier = "home"
+        name = "Home"
         url = "/"
       [[languages.en.menu.main]]
-        identifier = "showcase"
+        identifier = "blog"
+        name = "Blog"
+        url = "/blog/"
+      [[languages.en.menu.main]]
+        identifier = "reading"
         name = "Reading"
-        url = "/reading"
+        url = "/reading/"
+      [[languages.en.menu.main]]
+        identifier = "projects"
+        name = "Projects"
+        url = "/projects/"
