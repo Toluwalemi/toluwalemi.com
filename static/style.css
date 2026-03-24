@@ -335,3 +335,203 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* === Blinking terminal cursor === */
+.terminal-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  animation: blink 1s step-end infinite;
+  color: #222222;
+  font-weight: normal;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.dark-theme .terminal-cursor {
+  color: #9bb7ff;
+}
+
+/* === Last login banner === */
+.last-login {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto 12px;
+  padding: 0 20px;
+}
+
+.last-login-text {
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 0.78rem;
+  color: var(--soft-muted);
+  letter-spacing: 0.02em;
+}
+
+.dark-theme .last-login-text {
+  color: var(--soft-muted-dark);
+}
+
+/* === Keyboard shortcut hints in navbar === */
+.kbd-hint {
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 0.7em;
+  color: #888;
+  margin-left: 2px;
+}
+
+.dark-theme .kbd-hint {
+  color: #6f7888;
+}
+
+/* === Terminal 404 page === */
+.terminal-404 {
+  width: 100%;
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.terminal-window {
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1e1e1e;
+}
+
+.terminal-header {
+  background: #e0e0e0;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.terminal-dot--red { background: #ff5f57; }
+.terminal-dot--yellow { background: #febc2e; }
+.terminal-dot--green { background: #28c840; }
+
+.terminal-title {
+  margin-left: 8px;
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.terminal-body {
+  padding: 20px;
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: #e0e0e0;
+}
+
+.terminal-body p {
+  margin: 0;
+  font-family: inherit;
+}
+
+.terminal-prompt {
+  color: #0cc471;
+}
+
+.terminal-path {
+  color: #5cb3ff;
+}
+
+.terminal-symbol {
+  color: #e0e0e0;
+  margin: 0 4px;
+}
+
+.terminal-url-path {
+  color: #e0e0e0;
+}
+
+.terminal-error {
+  color: #ff6b6b;
+  margin: 8px 0;
+}
+
+.terminal-hint {
+  color: #888;
+  margin: 8px 0 16px;
+  font-size: 0.85rem;
+}
+
+.terminal-link {
+  color: #5cb3ff;
+  text-decoration: none;
+}
+
+.terminal-link:hover {
+  text-decoration: underline;
+  color: #8ccfff;
+}
+
+.dark-theme .terminal-window {
+  border-color: #3c424d;
+}
+
+.dark-theme .terminal-header {
+  background: #2a2e35;
+}
+
+.dark-theme .terminal-title {
+  color: #aaa;
+}
+
+/* === Reading page cat style === */
+.cat-output {
+  border-left: 3px solid #d8d8d8;
+  padding-left: 16px;
+  margin: 8px 0;
+  position: relative;
+}
+
+.dark-theme .cat-output {
+  border-left-color: #3c424d;
+}
+
+.cat-content {
+  counter-reset: cat-line;
+}
+
+.cat-content > h1,
+.cat-content > h2,
+.cat-content > p,
+.cat-content > ul {
+  position: relative;
+  padding-left: 36px;
+}
+
+.cat-content > h1::before,
+.cat-content > h2::before,
+.cat-content > p::before,
+.cat-content > ul::before {
+  counter-increment: cat-line;
+  content: counter(cat-line);
+  position: absolute;
+  left: 0;
+  color: #bbb;
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 0.78rem;
+  min-width: 24px;
+  text-align: right;
+  top: 4px;
+}
+
+.dark-theme .cat-content > h1::before,
+.dark-theme .cat-content > h2::before,
+.dark-theme .cat-content > p::before,
+.dark-theme .cat-content > ul::before {
+  color: #555;
+}

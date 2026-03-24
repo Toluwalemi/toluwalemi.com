@@ -1,0 +1,18 @@
+{{ define "main" }}
+  <div class="terminal-404">
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <span class="terminal-dot terminal-dot--red"></span>
+        <span class="terminal-dot terminal-dot--yellow"></span>
+        <span class="terminal-dot terminal-dot--green"></span>
+        <span class="terminal-title">zsh</span>
+      </div>
+      <div class="terminal-body">
+        <p><span class="terminal-prompt">toluwalemi@web</span> <span class="terminal-path">~</span> <span class="terminal-symbol">%</span> curl toluwalemi.dev<span class="terminal-url-path">{{ .RelPermalink }}</span></p>
+        <p class="terminal-error">zsh: command not found: {{ .RelPermalink }}</p>
+        <p class="terminal-hint">The page you're looking for doesn't exist or has been moved.</p>
+        <p><span class="terminal-prompt">toluwalemi@web</span> <span class="terminal-path">~</span> <span class="terminal-symbol">%</span> <a href="/" class="terminal-link">cd /</a><span class="terminal-cursor">&#9610;</span></p>
+      </div>
+    </div>
+  </div>
+{{ end }}

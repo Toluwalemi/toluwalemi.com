@@ -3,9 +3,7 @@
   <head>
     {{ block "title" . }}
       <title>
-        {{ if .IsHome }}{{ $.Site.Title }}{{ with $.Site.Params.Subtitle }} —
-        {{ . }}{{ end }}{{ else }}{{ .Title }} ::
-        {{ $.Site.Title }}{{ with $.Site.Params.Subtitle }} — {{ . }}{{ end }}{{ end }}
+        {{ if .IsHome }}Toluwalemi Oluwadare | Software Engineer{{ else }}{{ .Title }} | Toluwalemi Oluwadare{{ end }}
       </title>
     {{ end }}
     {{ partial "head.html" . }}

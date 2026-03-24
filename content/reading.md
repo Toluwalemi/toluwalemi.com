@@ -1,5 +1,6 @@
 +++
 title = "My Reading List"
+layout = "reading"
 +++
 
 # Currently Reading
