@@ -535,3 +535,100 @@ body {
 .dark-theme .cat-content > ul::before {
   color: #555;
 }
+
+/* === 1. Retro Terminal Selection Style === */
+::selection {
+  background: #0cc471;
+  color: #1e1e1e;
+  text-shadow: none;
+}
+
+.dark-theme ::selection {
+  background: #9bb7ff;
+  color: #1f2124;
+}
+
+::-moz-selection {
+  background: #0cc471;
+  color: #1e1e1e;
+  text-shadow: none;
+}
+
+.dark-theme ::-moz-selection {
+  background: #9bb7ff;
+  color: #1f2124;
+}
+
+/* === 2. Minimalist Custom Scrollbars === */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--soft-background);
+  border-left: 1px solid var(--grid-line);
+}
+
+.dark-theme ::-webkit-scrollbar-track {
+  background: var(--soft-background-dark);
+  border-left: 1px solid var(--grid-line-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0cc471;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+  background: #4a515d;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: #9bb7ff;
+}
+
+/* === 3. Phosphor Glow on Dark Mode Terminal / Cards === */
+.dark-theme .terminal-window {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.dark-theme .terminal-window:hover {
+  box-shadow: 0 0 15px rgba(155, 183, 255, 0.15);
+  border-color: rgba(155, 183, 255, 0.4);
+}
+
+.dark-theme .home-card {
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.3s ease;
+}
+
+.dark-theme .home-card:hover,
+.dark-theme .home-card:focus-visible {
+  box-shadow: 0 0 12px rgba(155, 183, 255, 0.12);
+}
+
+/* === 5. Subtle Glitch Effect on Main Headings === */
+@keyframes glitch-anim {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(-1px, -1px); }
+  60% { transform: translate(2px, 1px); }
+  80% { transform: translate(1px, -1px); }
+  100% { transform: translate(0); }
+}
+
+h1.home-title:hover,
+h1.post-title:hover {
+  animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+  color: #0cc471;
+}
+
+.dark-theme h1.home-title:hover,
+.dark-theme h1.post-title:hover {
+  color: #9bb7ff;
+  text-shadow: 0 0 5px rgba(155, 183, 255, 0.5);
+}

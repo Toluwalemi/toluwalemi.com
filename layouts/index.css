@@ -160,10 +160,13 @@ h2#currently-reading {
 a {
     color: #0cc471;
     text-decoration: none;
+    border-bottom: 2px dashed transparent;
+    transition: border-bottom-color 0.2s ease, color 0.2s ease;
 }
 a:hover {
     color: #2a7ae2;
-    text-decoration: underline;
+    text-decoration: none;
+    border-bottom: 2px solid #2a7ae2;
 }
 p {
     margin-bottom: 1rem;
