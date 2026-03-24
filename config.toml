@@ -50,7 +50,7 @@ paginate = 10
     lastModDisplay = "Last Updated:"
 
     [languages.en.params.logo]
-      logoText = "Toluwalemi"
+      logoText = "Toluwalemi ⚡"
       logoHomeLink = "/"
     # or
     #
@@ -60,13 +60,13 @@ paginate = 10
     [languages.en.menu]
       [[languages.en.menu.main]]
         identifier = "blog"
-        name = "Blog"
+        name = "Blog 📝"
         url = "/blog/"
       [[languages.en.menu.main]]
         identifier = "reading"
-        name = "Reading"
+        name = "Reading 🤓📖"
         url = "/reading/"
       [[languages.en.menu.main]]
         identifier = "projects"
-        name = "Projects"
+        name = "Projects 👾🕹️"
         url = "/projects/"

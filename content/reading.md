@@ -3,7 +3,7 @@ title = "My Reading List"
 layout = "reading"
 +++
 
-# Currently Reading
+# Currently Reading 🤓📖
 -  Fourth Wing *by Rebecca Yarros*
 
 # 2025
