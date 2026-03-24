@@ -8,7 +8,15 @@
     <div class="projects-grid">
       {{ range .Pages.ByDate.Reverse }}
         <article class="project-card">
-          <h2 class="project-title">{{ .Title }}</h2>
+          <h2 class="project-title">
+            {{- if .Params.demo -}}
+              <a href="{{ .Params.demo }}" target="_blank" rel="noopener">{{ .Title }}</a>
+            {{- else if .Params.github -}}
+              <a href="{{ .Params.github }}" target="_blank" rel="noopener">{{ .Title }}</a>
+            {{- else -}}
+              {{ .Title }}
+            {{- end -}}
+          </h2>
           {{ with .Params.status }}
             <p class="project-status">status: {{ . }}</p>
           {{ end }}
@@ -23,12 +31,16 @@
             </ul>
           {{ end }}
           <div class="project-links">
-            <a href="{{ .RelPermalink }}">Details</a>
+            {{ with .Params.demo }}
+              <a href="{{ . }}" target="_blank" rel="noopener">Demo</a>
+            {{ else }}
+              <a href="{{ .RelPermalink }}">Details</a>
+            {{ end }}
             {{ with .Params.github }}
-              <a href="{{ . }}">GitHub</a>
+              <a href="{{ . }}" target="_blank" rel="noopener">GitHub</a>
             {{ end }}
             {{ with .Params.live }}
-              <a href="{{ . }}">Live</a>
+              <a href="{{ . }}" target="_blank" rel="noopener">Live</a>
             {{ end }}
           </div>
         </article>

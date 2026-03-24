@@ -1,7 +1,7 @@
 +++
 title = "PorosDjango"
-date = 2026-03-24T00:00:00Z
-description = "A Django project by Toluwalemi focused on practical backend engineering patterns."
+date = 2026-03-24T01:00:00Z
+description = "Django CLI bootstrap tool."
 github = "https://github.com/Toluwalemi/porosdjango"
 stack = ["Python", "Django"]
 status = "Active"

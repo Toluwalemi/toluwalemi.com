@@ -65,7 +65,7 @@ body {
   max-width: 800px;
   text-align: left;
   padding: 20px;
-  margin: 0 auto 10px;
+  margin: 0 auto 40px;
   background: rgba(255, 255, 255, 0.5);
   border: 1px solid #e2e2dd;
   border-radius: 12px;
@@ -142,7 +142,7 @@ body {
 .home-nav-grid {
   width: 100%;
   max-width: 800px;
-  margin: 0 auto 10px;
+  margin: 0 auto 40px;
   padding: 0 20px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -191,7 +191,7 @@ body {
 .home-section-heading {
   width: 100%;
   max-width: 800px;
-  margin: 18px auto 0;
+  margin: 36px auto 0;
   padding: 0 20px;
   text-align: left;
 }
