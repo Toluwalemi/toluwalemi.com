@@ -3,12 +3,13 @@ title = "My Reading List"
 layout = "reading"
 +++
 
-# Currently Reading 🤓📖
--  Fourth Wing *by Rebecca Yarros*
+# Currently <span style="white-space: nowrap;">Reading 🤓📖</span>
+- Kinsman and Foreman *by T.M. Aluko*
 
 # 2025
 - **May** - Dream Count *by Chimamanda Ngozi Adichie*
 - **February** - Children of Anguish and Anarchy  *by Tomi Adeyemi*
+- **December** - Fourth Wing *by Rebecca Yarros*
 
 # 2024
 - **January** - The Jungle: A Personal Journey with the Enfant Terrible of Nigerian Journalism *by David Hundeyin*

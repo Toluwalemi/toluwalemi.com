@@ -540,6 +540,16 @@ body {
   color: #555;
 }
 
+.cat-content > h1#currently-reading- {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .cat-content > h1#currently-reading- {
+    font-size: 1.45rem;
+  }
+}
+
 /* === 1. Retro Terminal Selection Style === */
 ::selection {
   background: #0cc471;
