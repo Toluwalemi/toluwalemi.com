@@ -7,7 +7,8 @@ const OPENROUTER_EMBED_URL = "https://openrouter.ai/api/v1/embeddings";
 const EMBEDDING_MODEL = "openai/text-embedding-3-small";
 
 const MAX_MESSAGES = 20;
-const MAX_MESSAGE_LENGTH = 500;
+const MAX_USER_MESSAGE_LENGTH = 500;
+const MAX_ASSISTANT_MESSAGE_LENGTH = 4000;
 const MAX_OUTPUT_TOKENS = 500;
 const ALLOWED_ROLES = new Set(["user", "assistant"]);
 const RAG_TOP_K = 5;
@@ -391,8 +392,9 @@ function validateMessages(rawMessages) {
       return { ok: false, error: "content cannot be empty" };
     }
 
-    if (trimmed.length > MAX_MESSAGE_LENGTH) {
-      return { ok: false, error: `content exceeds max of ${MAX_MESSAGE_LENGTH} chars` };
+    const maxLength = role === "user" ? MAX_USER_MESSAGE_LENGTH : MAX_ASSISTANT_MESSAGE_LENGTH;
+    if (trimmed.length > maxLength) {
+      return { ok: false, error: `content exceeds max of ${maxLength} chars for ${role}` };
     }
 
     cleaned.push({ role, content: trimmed });
