@@ -1,6 +1,7 @@
 // knowledge-base.json is bundled inline by esbuild at build time.
 // No readFileSync or import.meta.url needed — zero runtime file I/O.
 import knowledgeBaseData from "./knowledge-base.json" assert { type: "json" };
+import { stream } from "@netlify/functions";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_EMBED_URL = "https://openrouter.ai/api/v1/embeddings";
@@ -181,7 +182,7 @@ function json(statusCode, payload) {
   };
 }
 
-export async function handler(event) {
+export const handler = stream(async (event) => {
   if (event.httpMethod !== "POST") {
     return json(405, { error: "Method not allowed" });
   }
@@ -245,7 +246,7 @@ export async function handler(event) {
   const reader = upstream.body.getReader();
 
   let buffer = "";
-  const stream = new ReadableStream({
+  const tokenStream = new ReadableStream({
     async pull(controller) {
       const { done, value } = await reader.read();
 
@@ -294,11 +295,11 @@ export async function handler(event) {
     },
   });
 
-  return new Response(stream, {
+  return new Response(tokenStream, {
     status: 200,
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "no-store",
     },
   });
-}
+});

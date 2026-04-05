@@ -1,4 +1,7 @@
 {
   "name": "digital-twin-functions",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@netlify/functions": "^2.0.0"
+  }
 }
