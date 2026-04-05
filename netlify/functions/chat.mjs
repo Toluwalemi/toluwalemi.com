@@ -14,6 +14,7 @@ const EMBEDDING_WEIGHT = 0.7;
 const LEXICAL_WEIGHT = 0.3;
 const SOURCE_REPEAT_PENALTY = 0.06;
 const MIN_HYBRID_SCORE = 0.22;
+const MIN_LEXICAL_SCORE = 0.18;
 const RAG_DEBUG = process.env.RAG_DEBUG === "true";
 const NO_CONTEXT_REPLY = "I don't have enough information in my knowledge base to answer that accurately.";
 const STOPWORDS = new Set([
@@ -73,6 +74,21 @@ const chunkIndex = knowledgeBase.map((chunk, index) => ({
 const EMBEDDING_DIMENSION = chunkIndex.find(
   (chunk) => Array.isArray(chunk.embedding) && chunk.embedding.length > 0
 )?.embedding?.length || 0;
+const PROFILE_NAME = extractProfileName();
+const PROFILE_FIRST_NAME = PROFILE_NAME.split(" ")[0]?.toLowerCase() || "";
+
+function extractProfileName() {
+  const bioChunk = chunkIndex.find((chunk) => chunk.source === "bio" && typeof chunk.text === "string");
+  if (!bioChunk) return "Toluwalemi";
+
+  const headingMatch = bioChunk.text.match(/^#\s*About\s+([^\n]+)/im);
+  if (headingMatch?.[1]) return headingMatch[1].trim();
+
+  const sentenceMatch = bioChunk.text.match(/([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})\s+—\s+often called/i);
+  if (sentenceMatch?.[1]) return sentenceMatch[1].trim();
+
+  return "Toluwalemi";
+}
 
 // Cosine similarity for equal-length vectors.
 function cosineSimilarity(a, b) {
@@ -139,6 +155,10 @@ function rankCandidates(questionTerms, queryEmbedding) {
       const hybridScore = hasEmbedding && chunkHasEmbedding
         ? EMBEDDING_WEIGHT * embeddingScore + LEXICAL_WEIGHT * lexicalScore
         : lexicalScore;
+      const retrievalScore = hasEmbedding && chunkHasEmbedding ? hybridScore : lexicalScore;
+      const scoreThreshold = hasEmbedding && chunkHasEmbedding
+        ? MIN_HYBRID_SCORE
+        : MIN_LEXICAL_SCORE;
 
       return {
         source: chunk.source,
@@ -146,9 +166,11 @@ function rankCandidates(questionTerms, queryEmbedding) {
         lexicalScore,
         embeddingScore,
         hybridScore,
+        retrievalScore,
+        scoreThreshold,
       };
     })
-    .sort((a, b) => b.hybridScore - a.hybridScore);
+    .sort((a, b) => b.retrievalScore - a.retrievalScore);
 }
 
 function selectDiverseTopK(candidates, topK) {
@@ -157,8 +179,8 @@ function selectDiverseTopK(candidates, topK) {
 
   for (const candidate of candidates) {
     const seen = sourceCounts[candidate.source] || 0;
-    const adjustedScore = candidate.hybridScore - seen * SOURCE_REPEAT_PENALTY;
-    if (adjustedScore < MIN_HYBRID_SCORE) continue;
+    const adjustedScore = candidate.retrievalScore - seen * SOURCE_REPEAT_PENALTY;
+    if (adjustedScore < candidate.scoreThreshold) continue;
 
     selected.push({ ...candidate, adjustedScore });
     sourceCounts[candidate.source] = seen + 1;
@@ -178,14 +200,23 @@ function logRetrieval(question, selected, candidates) {
   if (!RAG_DEBUG) return;
   const preview = candidates.slice(0, 8).map((item) => ({
     source: item.source,
+    threshold: Number(item.scoreThreshold.toFixed(4)),
+    retrieval: Number(item.retrievalScore.toFixed(4)),
     hybrid: Number(item.hybridScore.toFixed(4)),
     emb: Number(item.embeddingScore.toFixed(4)),
     lex: Number(item.lexicalScore.toFixed(4)),
   }));
+  const embeddingMode = candidates[0]?.scoreThreshold === MIN_HYBRID_SCORE ? "hybrid" : "lexical";
   console.log(
     "[RAG] retrieval",
     JSON.stringify({
       question,
+      questionTerms: tokenize(question).size,
+      chunkCount: chunkIndex.length,
+      mode: embeddingMode,
+      bestScore: Number((candidates[0]?.retrievalScore || 0).toFixed(4)),
+      bestThreshold: Number((candidates[0]?.scoreThreshold || MIN_LEXICAL_SCORE).toFixed(4)),
+      selectedCount: selected.length,
       selectedSources: [...new Set(selected.map((s) => s.source))],
       topCandidates: preview,
     })
@@ -204,6 +235,7 @@ async function retrieveContext(question, apiKey) {
   }
 
   let queryEmbedding;
+  let embeddingFetchStatus = "not-requested";
   try {
     const response = await fetch(OPENROUTER_EMBED_URL, {
       method: "POST",
@@ -218,20 +250,36 @@ async function retrieveContext(question, apiKey) {
     });
 
     if (!response.ok) {
+      embeddingFetchStatus = `http-${response.status}`;
       queryEmbedding = null;
     } else {
       const { data } = await response.json();
       queryEmbedding = isValidEmbeddingVector(data?.[0]?.embedding)
         ? data[0].embedding
         : null;
+      embeddingFetchStatus = queryEmbedding ? "ok" : "invalid-payload";
     }
-  } catch {
+  } catch (error) {
+    embeddingFetchStatus = `error-${error?.name || "unknown"}`;
     queryEmbedding = null;
   }
 
+  if (RAG_DEBUG) {
+    console.log(
+      "[RAG] embedding",
+      JSON.stringify({
+        status: embeddingFetchStatus,
+        questionTerms: questionTerms.size,
+        queryEmbeddingDim: Array.isArray(queryEmbedding) ? queryEmbedding.length : 0,
+        expectedEmbeddingDim: EMBEDDING_DIMENSION,
+      })
+    );
+  }
+
   const ranked = rankCandidates(questionTerms, queryEmbedding);
-  const bestScore = ranked[0]?.hybridScore || 0;
-  if (bestScore < MIN_HYBRID_SCORE) {
+  const bestScore = ranked[0]?.retrievalScore || 0;
+  const bestThreshold = ranked[0]?.scoreThreshold || MIN_LEXICAL_SCORE;
+  if (bestScore < bestThreshold) {
     logRetrieval(question, [], ranked);
     return { context: "", selectedSources: [] };
   }
@@ -275,6 +323,25 @@ function buildSystemPrompt(context) {
     BASE_SYSTEM_PROMPT +
     `\n\n---\nCONTEXT (retrieved from Toluwalemi's knowledge base — use this to answer the user's question):\n\n${context}\n---`
   );
+}
+
+function replyWithoutContext(question) {
+  const normalized = String(question || "").trim().toLowerCase();
+  if (!normalized) return NO_CONTEXT_REPLY;
+
+  if (/^(hi|hello|hey|howdy)\b/.test(normalized)) {
+    return `Hi — I'm ${PROFILE_NAME}'s AI digital twin. Ask me about my background, experience, projects, skills, education, or availability.`;
+  }
+
+  if (/\b(who are you|what(?:'s| is) your name)\b/.test(normalized)) {
+    return `I'm ${PROFILE_NAME}'s AI digital twin.`;
+  }
+
+  if (PROFILE_FIRST_NAME && normalized.includes(`who is ${PROFILE_FIRST_NAME}`)) {
+    return `${PROFILE_NAME} is a software engineer based in Nigeria with over five years of backend engineering experience. Ask me and I can share details from the knowledge base.`;
+  }
+
+  return NO_CONTEXT_REPLY;
 }
 
 // Request parsing and validation
@@ -378,7 +445,7 @@ export async function handler(event) {
         "cache-control": "no-store",
         "x-rag-sources": "",
       },
-      body: NO_CONTEXT_REPLY,
+      body: replyWithoutContext(latestUserMessage.content),
     };
   }
 
