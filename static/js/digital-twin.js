@@ -74,6 +74,18 @@
     return assistantText;
   }
 
+  var suggestions = document.getElementById("digital-twin-suggestions");
+  if (suggestions) {
+    suggestions.addEventListener("click", function (event) {
+      var chip = event.target.closest(".digital-twin-chip");
+      if (!chip) return;
+      var question = chip.dataset.q;
+      if (!question) return;
+      input.value = question;
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    });
+  }
+
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
     if (isStreaming) return;

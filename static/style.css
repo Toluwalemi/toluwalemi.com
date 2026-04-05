@@ -535,6 +535,47 @@ body {
   margin: 0;
 }
 
+.digital-twin-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.digital-twin-suggestions-label {
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 0.78rem;
+  color: #8e8e8e;
+  white-space: nowrap;
+}
+
+.digital-twin-chip {
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 0.78rem;
+  color: #0cc471;
+  background: transparent;
+  border: 1px solid #2a5c3f;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.digital-twin-chip:hover {
+  background: #0cc47118;
+  border-color: #0cc471;
+}
+
+.dark-theme .digital-twin-chip {
+  border-color: #1e4d35;
+}
+
+.dark-theme .digital-twin-chip:hover {
+  background: #0cc47122;
+  border-color: #0cc471;
+}
+
 .digital-twin-log {
   flex: 1;
   min-height: 320px;
