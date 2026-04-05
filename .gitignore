@@ -35,3 +35,6 @@ hugo.linux
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Local Netlify folder
+.netlify
