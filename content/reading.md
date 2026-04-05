@@ -1,15 +1,16 @@
 +++
 title = "My Reading List"
 layout = "reading"
+description = "Books I’m currently reading and a running archive of titles by year."
 +++
 
 # Currently <span style="white-space: nowrap;">Reading 🤓📖</span>
 - Kinsman and Foreman *by T.M. Aluko*
 
 # 2025
+- **December** - Fourth Wing *by Rebecca Yarros*
 - **May** - Dream Count *by Chimamanda Ngozi Adichie*
 - **February** - Children of Anguish and Anarchy  *by Tomi Adeyemi*
-- **December** - Fourth Wing *by Rebecca Yarros*
 
 # 2024
 - **January** - The Jungle: A Personal Journey with the Enfant Terrible of Nigerian Journalism *by David Hundeyin*
