@@ -15,6 +15,16 @@ const LEXICAL_WEIGHT = 0.3;
 const SOURCE_REPEAT_PENALTY = 0.06;
 const MIN_HYBRID_SCORE = 0.22;
 const RAG_DEBUG = process.env.RAG_DEBUG === "true";
+const NO_CONTEXT_REPLY = "I don't have enough information in my knowledge base to answer that accurately.";
+const STOPWORDS = new Set([
+  "about", "after", "again", "also", "and", "any", "are", "been", "being", "both",
+  "but", "can", "did", "does", "doing", "done", "each", "exactly", "for", "from",
+  "had", "has", "have", "how", "into", "its", "just", "many", "more", "most",
+  "much", "only", "other", "over", "same", "share", "some", "such", "than", "that",
+  "the", "their", "them", "then", "there", "these", "they", "this", "those", "through",
+  "timeline", "very", "what", "when", "where", "which", "while", "who", "with", "work",
+  "worked", "your",
+]);
 
 function isAllowedOrigin(origin) {
   if (!origin) return true;
@@ -60,18 +70,40 @@ const chunkIndex = knowledgeBase.map((chunk, index) => ({
   terms: tokenize(chunk.text),
 }));
 
+const EMBEDDING_DIMENSION = chunkIndex.find(
+  (chunk) => Array.isArray(chunk.embedding) && chunk.embedding.length > 0
+)?.embedding?.length || 0;
+
 // Cosine similarity for equal-length vectors.
 function cosineSimilarity(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length === 0 || a.length !== b.length) {
+    return 0;
+  }
+
   let dot = 0;
   let normA = 0;
   let normB = 0;
   for (let i = 0; i < a.length; i++) {
-    dot += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
+    const av = Number(a[i]);
+    const bv = Number(b[i]);
+    if (!Number.isFinite(av) || !Number.isFinite(bv)) {
+      return 0;
+    }
+    dot += av * bv;
+    normA += av * av;
+    normB += bv * bv;
   }
   const denom = Math.sqrt(normA) * Math.sqrt(normB);
   return denom === 0 ? 0 : dot / denom;
+}
+
+function isValidEmbeddingVector(vector) {
+  return (
+    Array.isArray(vector) &&
+    vector.length > 0 &&
+    (EMBEDDING_DIMENSION === 0 || vector.length === EMBEDDING_DIMENSION) &&
+    vector.every((value) => Number.isFinite(Number(value)))
+  );
 }
 
 function tokenize(text) {
@@ -81,7 +113,7 @@ function tokenize(text) {
   const terms = normalized
     .split(/\s+/)
     .map((term) => term.trim())
-    .filter((term) => term.length >= 3);
+    .filter((term) => term.length >= 3 && !STOPWORDS.has(term));
   return new Set(terms);
 }
 
@@ -96,14 +128,15 @@ function lexicalSimilarity(questionTerms, chunkTerms) {
 }
 
 function rankCandidates(questionTerms, queryEmbedding) {
-  const hasEmbedding = Array.isArray(queryEmbedding) && queryEmbedding.length > 0;
+  const hasEmbedding = isValidEmbeddingVector(queryEmbedding);
   return chunkIndex
     .map((chunk) => {
       const lexicalScore = lexicalSimilarity(questionTerms, chunk.terms);
-      const embeddingScore = hasEmbedding
+      const chunkHasEmbedding = isValidEmbeddingVector(chunk.embedding);
+      const embeddingScore = hasEmbedding && chunkHasEmbedding
         ? (cosineSimilarity(queryEmbedding, chunk.embedding) + 1) / 2
         : 0;
-      const hybridScore = hasEmbedding
+      const hybridScore = hasEmbedding && chunkHasEmbedding
         ? EMBEDDING_WEIGHT * embeddingScore + LEXICAL_WEIGHT * lexicalScore
         : lexicalScore;
 
@@ -188,7 +221,9 @@ async function retrieveContext(question, apiKey) {
       queryEmbedding = null;
     } else {
       const { data } = await response.json();
-      queryEmbedding = data?.[0]?.embedding || null;
+      queryEmbedding = isValidEmbeddingVector(data?.[0]?.embedding)
+        ? data[0].embedding
+        : null;
     }
   } catch {
     queryEmbedding = null;
@@ -334,6 +369,18 @@ export async function handler(event) {
   const retrieval = latestUserMessage
     ? await retrieveContext(latestUserMessage.content, apiKey)
     : { context: "", selectedSources: [] };
+
+  if (latestUserMessage && !retrieval.context) {
+    return {
+      statusCode: 200,
+      headers: {
+        "content-type": "text/plain; charset=utf-8",
+        "cache-control": "no-store",
+        "x-rag-sources": "",
+      },
+      body: NO_CONTEXT_REPLY,
+    };
+  }
 
   const payload = {
     model: "anthropic/claude-3.5-haiku",
