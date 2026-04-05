@@ -11,4 +11,5 @@
 
 [functions]
   directory = "netlify/functions"
-  included_files = ["netlify/functions/knowledge-base.json"]
+  node_bundler = "none"
+  included_files = ["netlify/functions/knowledge-base.json", "netlify/functions/knowledge"]

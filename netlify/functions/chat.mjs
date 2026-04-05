@@ -2,7 +2,12 @@ import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+// import.meta.url is undefined when esbuild bundles ESM to CJS.
+// Fall back to the CJS __dirname global which esbuild preserves.
+const __dirname =
+  typeof __dirname !== "undefined"
+    ? __dirname
+    : dirname(fileURLToPath(import.meta.url));
 
 // API and guardrails
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
