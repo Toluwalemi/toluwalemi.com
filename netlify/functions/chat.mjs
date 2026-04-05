@@ -1,8 +1,5 @@
-import { readFileSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { existsSync, readFileSync } from "fs";
+import { join } from "path";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_EMBED_URL = "https://openrouter.ai/api/v1/embeddings";
@@ -34,7 +31,16 @@ function isAllowedOrigin(origin) {
 // Load knowledge base at cold start.
 let knowledgeBase = [];
 try {
-  const raw = readFileSync(join(__dirname, "knowledge-base.json"), "utf-8");
+  const pathCandidates = [
+    join(process.cwd(), "netlify/functions/knowledge-base.json"),
+    join(process.cwd(), "knowledge-base.json"),
+    typeof __dirname !== "undefined" ? join(__dirname, "knowledge-base.json") : null,
+  ].filter(Boolean);
+
+  const knowledgePath = pathCandidates.find((candidate) => existsSync(candidate));
+  if (!knowledgePath) throw new Error("knowledge-base.json not found");
+
+  const raw = readFileSync(knowledgePath, "utf-8");
   knowledgeBase = JSON.parse(raw);
   console.log(`[RAG] Knowledge base loaded: ${knowledgeBase.length} chunks`);
 } catch {
