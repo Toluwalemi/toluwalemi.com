@@ -145,8 +145,20 @@ body {
   margin: 0 auto 40px;
   padding: 0 20px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .home-card {
@@ -491,6 +503,113 @@ body {
 
 .dark-theme .terminal-title {
   color: #aaa;
+}
+
+.digital-twin-page {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 30px;
+  padding: 0 20px;
+}
+
+.digital-twin-terminal-body {
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.digital-twin-intro p {
+  margin: 0;
+}
+
+.digital-twin-log {
+  flex: 1;
+  min-height: 320px;
+  max-height: 56vh;
+  overflow-y: auto;
+  border: 1px solid #343434;
+  border-radius: 6px;
+  padding: 12px;
+  background: #171717;
+}
+
+.digital-twin-line {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: start;
+}
+
+.digital-twin-line-prompt {
+  color: #0cc471;
+}
+
+.digital-twin-line--assistant .digital-twin-line-prompt {
+  color: #5cb3ff;
+}
+
+.digital-twin-line-content {
+  color: #e0e0e0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.digital-twin-error {
+  margin: 8px 0 0;
+  color: #ff6b6b;
+}
+
+.digital-twin-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.digital-twin-input-row input {
+  flex: 1;
+  min-width: 220px;
+  border: 1px solid #3f3f3f;
+  border-radius: 4px;
+  background: #111111;
+  color: #e0e0e0;
+  padding: 8px 10px;
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+}
+
+.digital-twin-input-row input::placeholder {
+  color: #8e8e8e;
+}
+
+.digital-twin-input-row .button {
+  margin: 0;
+}
+
+.digital-twin-input-row input:disabled,
+.digital-twin-input-row .button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dark-theme .digital-twin-log {
+  border-color: #3a404a;
+  background: #181b1f;
+}
+
+.dark-theme .digital-twin-line-content {
+  color: #d8dce2;
+}
+
+.dark-theme .digital-twin-line--assistant .digital-twin-line-prompt {
+  color: #9bb7ff;
+}
+
+.dark-theme .digital-twin-input-row input {
+  border-color: #4a515d;
+  background: #1b1f25;
+  color: #e5e7eb;
 }
 
 /* === Reading page cat style === */

@@ -7,6 +7,7 @@
       case "b": window.location.href = "/blog/"; break;
       case "r": window.location.href = "/reading/"; break;
       case "p": window.location.href = "/projects/"; break;
+      case "t": window.location.href = "/digital-twin/"; break;
     }
   });
 

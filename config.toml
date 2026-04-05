@@ -12,7 +12,7 @@ paginate = 10
   defaultTheme = "light"
 
   # if you set this to 0, only submenu trigger will be visible
-  showMenuItems = 3
+  showMenuItems = 4
 
   # Show reading time in minutes for posts
   showReadingTime = true
@@ -70,3 +70,7 @@ paginate = 10
         identifier = "projects"
         name = "Projects 👾🕹️"
         url = "/projects/"
+      [[languages.en.menu.main]]
+        identifier = "digital-twin"
+        name = "Digital Twin 🤖"
+        url = "/digital-twin/"

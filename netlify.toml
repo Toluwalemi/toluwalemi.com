@@ -8,3 +8,7 @@
 
 [context.production.environment]
   HUGO_ENV = "production"
+
+[functions]
+  directory = "netlify/functions"
+  included_files = ["netlify/functions/knowledge-base.json"]

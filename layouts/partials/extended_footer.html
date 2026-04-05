@@ -1,1 +1,4 @@
 <script src="{{ "js/nerdy.js" | absURL }}"></script>
+{{ if eq .Layout "digital-twin" }}
+<script src="{{ "js/digital-twin.js" | absURL }}"></script>
+{{ end }}

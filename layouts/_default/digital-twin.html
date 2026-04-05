@@ -1,0 +1,36 @@
+{{ define "main" }}
+  <section class="digital-twin-page">
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <span class="terminal-dot terminal-dot--red"></span>
+        <span class="terminal-dot terminal-dot--yellow"></span>
+        <span class="terminal-dot terminal-dot--green"></span>
+        <span class="terminal-title">toluwalemi@digital-twin:~</span>
+      </div>
+      <div class="terminal-body digital-twin-terminal-body">
+        <div class="digital-twin-intro">
+          <p><span class="terminal-prompt">system ready</span>. Do you want to know more about me?</p>
+          <p class="terminal-hint">Type your message below and press Enter or click send.</p>
+        </div>
+        <div id="digital-twin-log" class="digital-twin-log" aria-live="polite" aria-label="Chat transcript"></div>
+        <form id="digital-twin-form" class="digital-twin-input-row">
+          <label class="sr-only" for="digital-twin-input">Ask a question</label>
+          <span class="terminal-prompt">visitor@site</span>
+          <span class="terminal-symbol">:</span>
+          <span class="terminal-path">~</span>
+          <span class="terminal-symbol">$</span>
+          <input
+            id="digital-twin-input"
+            name="message"
+            type="text"
+            maxlength="500"
+            autocomplete="off"
+            placeholder="Ask about work, projects, stack, hobbies..."
+            required
+          />
+          <button type="submit" class="button">send</button>
+        </form>
+      </div>
+    </div>
+  </section>
+{{ end }}
