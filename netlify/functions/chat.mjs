@@ -14,11 +14,23 @@ const MAX_MESSAGE_LENGTH = 500;
 const MAX_OUTPUT_TOKENS = 500;
 const ALLOWED_ROLES = new Set(["user", "assistant"]);
 const RAG_TOP_K = 3; // Number of knowledge chunks to inject per request
-const ALLOWED_ORIGINS = new Set([
-  "https://toluwalemi.com",
-  "https://www.toluwalemi.com",
-  "http://localhost:8888", // netlify dev
-]);
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+
+  const allowedOrigins = new Set(
+    [
+      "https://toluwalemi.com",
+      "https://www.toluwalemi.com",
+      "http://localhost:8888",
+      process.env.URL,
+      process.env.DEPLOY_PRIME_URL,
+      process.env.DEPLOY_URL,
+    ].filter(Boolean)
+  );
+
+  return allowedOrigins.has(origin);
+}
 
 // Load knowledge base at cold start.
 let knowledgeBase = [];
@@ -184,7 +196,7 @@ export async function handler(event) {
   }
 
   const origin = event.headers?.origin || event.headers?.Origin || "";
-  if (!ALLOWED_ORIGINS.has(origin)) {
+  if (!isAllowedOrigin(origin)) {
     return json(403, { error: "Forbidden" });
   }
 
