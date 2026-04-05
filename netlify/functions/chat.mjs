@@ -1,7 +1,8 @@
-// knowledge-base.json is bundled inline by esbuild at build time.
-// No readFileSync or import.meta.url needed — zero runtime file I/O.
-import knowledgeBaseData from "./knowledge-base.json" with { type: "json" };
-import { stream } from "@netlify/functions";
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_EMBED_URL = "https://openrouter.ai/api/v1/embeddings";
@@ -30,9 +31,15 @@ function isAllowedOrigin(origin) {
   return allowedOrigins.has(origin);
 }
 
-// Knowledge base bundled at build time — always available, zero cold-start cost.
-const knowledgeBase = Array.isArray(knowledgeBaseData) ? knowledgeBaseData : [];
-console.log(`[RAG] Knowledge base loaded: ${knowledgeBase.length} chunks`);
+// Load knowledge base at cold start.
+let knowledgeBase = [];
+try {
+  const raw = readFileSync(join(__dirname, "knowledge-base.json"), "utf-8");
+  knowledgeBase = JSON.parse(raw);
+  console.log(`[RAG] Knowledge base loaded: ${knowledgeBase.length} chunks`);
+} catch {
+  console.warn("[RAG] No knowledge found. Running without RAG context.");
+}
 
 // Cosine similarity for equal-length vectors.
 function cosineSimilarity(a, b) {
@@ -182,7 +189,7 @@ function json(statusCode, payload) {
   };
 }
 
-export const handler = stream(async (event) => {
+export async function handler(event) {
   if (event.httpMethod !== "POST") {
     return json(405, { error: "Method not allowed" });
   }
@@ -217,7 +224,7 @@ export const handler = stream(async (event) => {
   const payload = {
     model: "anthropic/claude-3.5-haiku",
     max_tokens: MAX_OUTPUT_TOKENS,
-    stream: true,
+    stream: false,
     messages: [
       { role: "system", content: buildSystemPrompt(context) },
       ...validation.cleaned,
@@ -235,71 +242,23 @@ export const handler = stream(async (event) => {
     body: JSON.stringify(payload),
   });
 
-  if (!upstream.ok || !upstream.body) {
+  if (!upstream.ok) {
     const details = await upstream.text();
     return json(502, { error: "Upstream LLM request failed", details });
   }
 
-  // Stream assistant tokens back to the client.
-  const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
-  const reader = upstream.body.getReader();
+  const upstreamJson = await upstream.json();
+  const assistantText = upstreamJson?.choices?.[0]?.message?.content;
+  if (typeof assistantText !== "string" || !assistantText.trim()) {
+    return json(502, { error: "Upstream LLM response was empty" });
+  }
 
-  let buffer = "";
-  const tokenStream = new ReadableStream({
-    async pull(controller) {
-      const { done, value } = await reader.read();
-
-      if (done) {
-        if (buffer) {
-          const trailing = buffer.trim();
-          if (trailing.startsWith("data:")) {
-            const data = trailing.slice(5).trim();
-            if (data && data !== "[DONE]") {
-              try {
-                const parsed = JSON.parse(data);
-                const delta = parsed?.choices?.[0]?.delta?.content;
-                if (typeof delta === "string" && delta.length > 0) {
-                  controller.enqueue(encoder.encode(delta));
-                }
-              } catch {
-                // Ignore malformed trailing event.
-              }
-            }
-          }
-        }
-        controller.close();
-        return;
-      }
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() || "";
-
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed.startsWith("data:")) continue;
-        const data = trimmed.slice(5).trim();
-        if (!data || data === "[DONE]") continue;
-
-        try {
-          const parsed = JSON.parse(data);
-          const delta = parsed?.choices?.[0]?.delta?.content;
-          if (typeof delta === "string" && delta.length > 0) {
-            controller.enqueue(encoder.encode(delta));
-          }
-        } catch {
-          // Ignore malformed partial event.
-        }
-      }
-    },
-  });
-
-  return new Response(tokenStream, {
-    status: 200,
+  return {
+    statusCode: 200,
     headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-      "Cache-Control": "no-store",
+      "content-type": "text/plain; charset=utf-8",
+      "cache-control": "no-store",
     },
-  });
-});
+    body: assistantText,
+  };
+}
