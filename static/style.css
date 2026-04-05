@@ -401,6 +401,18 @@ body {
   color: #6f7888;
 }
 
+/* === Prevent nav from wrapping to two lines on desktop === */
+@media (min-width: 684px) {
+  .menu__inner--desktop {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+
+  .menu__inner--desktop li:not(:first-of-type) {
+    margin-left: 12px;
+  }
+}
+
 /* === Terminal 404 page === */
 .terminal-404 {
   width: 100%;
@@ -585,6 +597,31 @@ body {
 
 .digital-twin-input-row .button {
   margin: 0;
+  background: #1a1a1a;
+  color: #0cc471;
+  border: 1px solid #0cc471;
+  border-radius: 4px;
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  letter-spacing: 0.03em;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.digital-twin-input-row .button:hover:not(:disabled) {
+  background: #0cc471;
+  color: #1a1a1a;
+}
+
+.dark-theme .digital-twin-input-row .button {
+  background: #111518;
+  color: #0cc471;
+  border-color: #0cc471;
+}
+
+.dark-theme .digital-twin-input-row .button:hover:not(:disabled) {
+  background: #0cc471;
+  color: #111518;
 }
 
 .digital-twin-input-row input:disabled,
