@@ -528,11 +528,18 @@ body {
   min-height: 520px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .digital-twin-intro p {
   margin: 0;
+  font-size: 0.85rem;
+  color: #8e8e8e;
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+}
+
+.digital-twin-intro .terminal-prompt {
+  color: #0cc471;
 }
 
 .digital-twin-suggestions {
@@ -607,6 +614,16 @@ body {
   color: #e0e0e0;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.digital-twin-separator {
+  border: none;
+  border-top: 1px dashed rgba(12, 196, 113, 0.2);
+  margin: 10px 0;
+}
+
+.dark-theme .digital-twin-separator {
+  border-top-color: rgba(12, 196, 113, 0.15);
 }
 
 .digital-twin-error {

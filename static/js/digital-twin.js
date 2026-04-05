@@ -29,6 +29,14 @@
     return content;
   }
 
+  function appendSeparator() {
+    var sep = document.createElement("div");
+    sep.className = "digital-twin-separator";
+    sep.setAttribute("aria-hidden", "true");
+    log.appendChild(sep);
+    log.scrollTop = log.scrollHeight;
+  }
+
   function appendError(text) {
     var row = document.createElement("p");
     row.className = "digital-twin-error";
@@ -113,6 +121,7 @@
       var assistantText = await streamAssistantResponse(history);
       history.push({ role: "assistant", content: assistantText });
       history = normalizedHistory();
+      appendSeparator();
     } catch (error) {
       appendError("Error: unable to reach digital twin right now. Please try again.");
       console.error(error);

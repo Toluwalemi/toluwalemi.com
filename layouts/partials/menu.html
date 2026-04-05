@@ -3,7 +3,7 @@
     {{ if or $.Site.Params.showMenuItems (eq $.Site.Params.showMenuItems 0) }}
       {{ range first $.Site.Params.showMenuItems $.Site.Menus.main }}
         {{ if not .HasChildren }}
-          <li><a href="{{ .URL }}">{{ .Name }}{{ if and .Identifier (ne .Identifier "home") }} <span class="kbd-hint">[{{ substr .Identifier 0 1 }}]</span>{{ end }}</a></li>
+          <li><a href="{{ .URL }}">{{ .Name }}{{ if and .Identifier (ne .Identifier "home") }} <span class="kbd-hint">[{{ if eq .Identifier "digital-twin" }}t{{ else }}{{ substr .Identifier 0 1 }}{{ end }}]</span>{{ end }}</a></li>
         {{ end }}
       {{ end }}
       {{ if gt (len $.Site.Menus.main) $.Site.Params.showMenuItems }}
@@ -17,7 +17,7 @@
           <ul class="menu__sub-inner-more hidden">
             {{ range last (sub (len $.Site.Menus.main) $.Site.Params.showMenuItems) $.Site.Menus.main }}
               {{ if not .HasChildren }}
-                <li><a href="{{ .URL }}">{{ .Name }}{{ if and .Identifier (ne .Identifier "home") }} <span class="kbd-hint">[{{ substr .Identifier 0 1 }}]</span>{{ end }}</a></li>
+                <li><a href="{{ .URL }}">{{ .Name }}{{ if and .Identifier (ne .Identifier "home") }} <span class="kbd-hint">[{{ if eq .Identifier "digital-twin" }}t{{ else }}{{ substr .Identifier 0 1 }}{{ end }}]</span>{{ end }}</a></li>
               {{ end }}
             {{ end }}
           </ul>
@@ -26,7 +26,7 @@
       {{ else }}
       {{ range $.Site.Menus.main }}
         {{ if not .HasChildren }}
-          <li><a href="{{ .URL }}">{{ .Name }}{{ if and .Identifier (ne .Identifier "home") }} <span class="kbd-hint">[{{ substr .Identifier 0 1 }}]</span>{{ end }}</a></li>
+          <li><a href="{{ .URL }}">{{ .Name }}{{ if and .Identifier (ne .Identifier "home") }} <span class="kbd-hint">[{{ if eq .Identifier "digital-twin" }}t{{ else }}{{ substr .Identifier 0 1 }}{{ end }}]</span>{{ end }}</a></li>
         {{ end }}
       {{ end }}
     {{ end }}
