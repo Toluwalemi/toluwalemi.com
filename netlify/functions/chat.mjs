@@ -1,6 +1,6 @@
 // knowledge-base.json is bundled inline by esbuild at build time.
 // No readFileSync or import.meta.url needed — zero runtime file I/O.
-import knowledgeBaseData from "./knowledge-base.json" assert { type: "json" };
+import knowledgeBaseData from "./knowledge-base.json" with { type: "json" };
 import { stream } from "@netlify/functions";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
