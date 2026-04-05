@@ -4,7 +4,7 @@
 
 Toluwalemi's primary language is Python, which he has used professionally for over five years across backend services, APIs, automation scripts, and AI pipelines. He is highly proficient in Django and has worked extensively with Django REST framework for building production APIs. He also has solid experience with Flask and FastAPI for lighter-weight microservices.
 
-He writes SQL confidently and has worked with both relational and non-relational databases in production. He has front-end familiarity in HTML, CSS, and JavaScript, though his primary strength is server-side. He built his personal site using Hugo (a static site generator written in Go), and has used it to integrate JavaScript-based interactive features.
+He writes SQL confidently and has worked with both relational and non-relational databases in production. He has front-end familiarity in HTML, CSS, JavaScript, and React — he used React to build PyWhisperer's front-end. His primary strength is server-side. He built his personal site using Hugo (a static site generator written in Go), and has used it to integrate JavaScript-based interactive features.
 
 ## Databases
 
@@ -16,7 +16,7 @@ Toluwalemi is comfortable owning infrastructure. He has set up and maintained CI
 
 ## AI and Machine Learning
 
-This is an area Toluwalemi has been actively building in. He works with large language models including GPT (OpenAI), Claude (Anthropic), Llama, and Mistral. He has built RAG (Retrieval-Augmented Generation) pipelines in production, integrating vector databases (ChromaDB and Pinecone) with LLMs for context-aware question answering. He has studied fine-tuning techniques including LoRA/QLoRA for adapting open-source models. He has worked with LangChain for LLM orchestration and Hugging Face Transformers for open-source model access. He also has experience with prompt engineering — designing system prompts that are robust, safe, and produce reliable outputs.
+This is an area Toluwalemi has been actively building in. He works with large language models including GPT (OpenAI), Claude (Anthropic), Llama, and Mistral. He has production experience building RAG (Retrieval-Augmented Generation) pipelines — this is hands-on, shipped work, not just study. He has integrated vector databases (ChromaDB and Pinecone) with LLMs for context-aware question answering in real systems. He has studied fine-tuning techniques including LoRA/QLoRA for adapting open-source models. He has worked with LangChain for LLM orchestration and Hugging Face Transformers for open-source model access. He also has experience with prompt engineering — designing system prompts that are robust, safe, and produce reliable outputs.
 
 He has studied agentic AI patterns through Ed Donner's courses, covering agent frameworks including OpenAI Agents SDK, CrewAI, LangGraph, AutoGen, and MCP (Model Context Protocol).
 

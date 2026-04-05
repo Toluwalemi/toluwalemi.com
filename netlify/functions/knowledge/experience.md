@@ -1,8 +1,8 @@
 # Work Experience
 
-## Senior Backend Engineer — Medfluencers Inc.
+## Senior Backend Engineer — Medfluencers Inc. (Most Recent Role)
 **Location:** Delaware, United States (remote from Nigeria)
-**Duration:** February 2024 — February 2026 (2 years)
+**Duration:** February 2024 — February 2026 (2 years) — this is Toluwalemi's most recent and latest employed position.
 
 Medfluencers is a marketing-tech company in the healthcare influencer space. As a Senior Backend Engineer, Toluwalemi worked on analytics, content tooling, and authentication infrastructure.
 
