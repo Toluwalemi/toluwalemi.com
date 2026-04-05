@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
+import { fileURLToPath } from "url";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_EMBED_URL = "https://openrouter.ai/api/v1/embeddings";
@@ -47,10 +48,13 @@ function isAllowedOrigin(origin) {
 // Load knowledge base at cold start.
 let knowledgeBase = [];
 try {
+  const moduleDir = typeof import.meta?.url === "string"
+    ? fileURLToPath(new URL(".", import.meta.url))
+    : process.cwd();
   const pathCandidates = [
     join(process.cwd(), "netlify/functions/knowledge-base.json"),
     join(process.cwd(), "knowledge-base.json"),
-    typeof __dirname !== "undefined" ? join(__dirname, "knowledge-base.json") : null,
+    join(moduleDir, "knowledge-base.json"),
   ].filter(Boolean);
 
   const knowledgePath = pathCandidates.find((candidate) => existsSync(candidate));
