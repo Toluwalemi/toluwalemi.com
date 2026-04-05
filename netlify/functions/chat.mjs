@@ -9,7 +9,12 @@ const MAX_MESSAGES = 20;
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_OUTPUT_TOKENS = 500;
 const ALLOWED_ROLES = new Set(["user", "assistant"]);
-const RAG_TOP_K = 3;
+const RAG_TOP_K = 5;
+const EMBEDDING_WEIGHT = 0.7;
+const LEXICAL_WEIGHT = 0.3;
+const SOURCE_REPEAT_PENALTY = 0.06;
+const MIN_HYBRID_SCORE = 0.22;
+const RAG_DEBUG = process.env.RAG_DEBUG === "true";
 
 function isAllowedOrigin(origin) {
   if (!origin) return true;
@@ -47,6 +52,14 @@ try {
   console.warn("[RAG] No knowledge found. Running without RAG context.");
 }
 
+const chunkIndex = knowledgeBase.map((chunk, index) => ({
+  id: index,
+  source: chunk.source,
+  text: chunk.text,
+  embedding: chunk.embedding,
+  terms: tokenize(chunk.text),
+}));
+
 // Cosine similarity for equal-length vectors.
 function cosineSimilarity(a, b) {
   let dot = 0;
@@ -61,9 +74,101 @@ function cosineSimilarity(a, b) {
   return denom === 0 ? 0 : dot / denom;
 }
 
-// Return top matching knowledge chunks for the latest user question.
+function tokenize(text) {
+  const normalized = String(text || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ");
+  const terms = normalized
+    .split(/\s+/)
+    .map((term) => term.trim())
+    .filter((term) => term.length >= 3);
+  return new Set(terms);
+}
+
+function lexicalSimilarity(questionTerms, chunkTerms) {
+  if (questionTerms.size === 0 || chunkTerms.size === 0) return 0;
+
+  let overlap = 0;
+  for (const term of questionTerms) {
+    if (chunkTerms.has(term)) overlap += 1;
+  }
+  return overlap / questionTerms.size;
+}
+
+function rankCandidates(questionTerms, queryEmbedding) {
+  const hasEmbedding = Array.isArray(queryEmbedding) && queryEmbedding.length > 0;
+  return chunkIndex
+    .map((chunk) => {
+      const lexicalScore = lexicalSimilarity(questionTerms, chunk.terms);
+      const embeddingScore = hasEmbedding
+        ? (cosineSimilarity(queryEmbedding, chunk.embedding) + 1) / 2
+        : 0;
+      const hybridScore = hasEmbedding
+        ? EMBEDDING_WEIGHT * embeddingScore + LEXICAL_WEIGHT * lexicalScore
+        : lexicalScore;
+
+      return {
+        source: chunk.source,
+        text: chunk.text,
+        lexicalScore,
+        embeddingScore,
+        hybridScore,
+      };
+    })
+    .sort((a, b) => b.hybridScore - a.hybridScore);
+}
+
+function selectDiverseTopK(candidates, topK) {
+  const selected = [];
+  const sourceCounts = {};
+
+  for (const candidate of candidates) {
+    const seen = sourceCounts[candidate.source] || 0;
+    const adjustedScore = candidate.hybridScore - seen * SOURCE_REPEAT_PENALTY;
+    if (adjustedScore < MIN_HYBRID_SCORE) continue;
+
+    selected.push({ ...candidate, adjustedScore });
+    sourceCounts[candidate.source] = seen + 1;
+
+    if (selected.length >= topK) break;
+  }
+
+  return selected;
+}
+
+function buildContext(selected) {
+  if (selected.length === 0) return "";
+  return selected.map((c) => `[${c.source}]\n${c.text}`).join("\n\n---\n\n");
+}
+
+function logRetrieval(question, selected, candidates) {
+  if (!RAG_DEBUG) return;
+  const preview = candidates.slice(0, 8).map((item) => ({
+    source: item.source,
+    hybrid: Number(item.hybridScore.toFixed(4)),
+    emb: Number(item.embeddingScore.toFixed(4)),
+    lex: Number(item.lexicalScore.toFixed(4)),
+  }));
+  console.log(
+    "[RAG] retrieval",
+    JSON.stringify({
+      question,
+      selectedSources: [...new Set(selected.map((s) => s.source))],
+      topCandidates: preview,
+    })
+  );
+}
+
+// Return grounded context and retrieval metadata for the latest user question.
 async function retrieveContext(question, apiKey) {
-  if (knowledgeBase.length === 0) return "";
+  if (chunkIndex.length === 0) {
+    return { context: "", selectedSources: [] };
+  }
+
+  const questionTerms = tokenize(question);
+  if (questionTerms.size === 0) {
+    return { context: "", selectedSources: [] };
+  }
 
   let queryEmbedding;
   try {
@@ -79,28 +184,30 @@ async function retrieveContext(question, apiKey) {
       }),
     });
 
-    if (!response.ok) return "";
-
-    const { data } = await response.json();
-    queryEmbedding = data?.[0]?.embedding;
-    if (!queryEmbedding) return "";
+    if (!response.ok) {
+      queryEmbedding = null;
+    } else {
+      const { data } = await response.json();
+      queryEmbedding = data?.[0]?.embedding || null;
+    }
   } catch {
-    // Retrieval is optional; continue without context on failure.
-    return "";
+    queryEmbedding = null;
   }
 
-  const topChunks = knowledgeBase
-    .map((chunk) => ({
-      text: chunk.text,
-      source: chunk.source,
-      score: cosineSimilarity(queryEmbedding, chunk.embedding),
-    }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, RAG_TOP_K);
+  const ranked = rankCandidates(questionTerms, queryEmbedding);
+  const bestScore = ranked[0]?.hybridScore || 0;
+  if (bestScore < MIN_HYBRID_SCORE) {
+    logRetrieval(question, [], ranked);
+    return { context: "", selectedSources: [] };
+  }
 
-  return topChunks
-    .map((c) => `[${c.source}]\n${c.text}`)
-    .join("\n\n---\n\n");
+  const selected = selectDiverseTopK(ranked, RAG_TOP_K);
+  logRetrieval(question, selected, ranked);
+
+  return {
+    context: buildContext(selected),
+    selectedSources: [...new Set(selected.map((s) => s.source))],
+  };
 }
 
 const BASE_SYSTEM_PROMPT = `You are Toluwalemi's AI digital twin on toluwalemi.com. Recruiters and visitors ask you questions about him and you answer on his behalf.
@@ -113,9 +220,10 @@ Identity and style:
 
 How to use the context:
 - You will receive a CONTEXT block with relevant facts retrieved from Toluwalemi's knowledge base.
-- Use that context as your primary source of truth for answering questions.
-- If the context does not contain enough information to answer confidently, say so honestly — never invent details.
-- Do not quote the context verbatim; synthesise it naturally into your answer.
+- Treat CONTEXT as the only source of truth for factual claims about Toluwalemi.
+- If CONTEXT is missing or insufficient, explicitly say you do not have enough information in the knowledge base.
+- Do not infer, guess, or fill gaps with generic assumptions.
+- Summarise context naturally and briefly.
 
 Safety and boundaries:
 - Never claim access to private or confidential data.
@@ -223,16 +331,16 @@ export async function handler(event) {
     .reverse()
     .find((m) => m.role === "user");
 
-  const context = latestUserMessage
+  const retrieval = latestUserMessage
     ? await retrieveContext(latestUserMessage.content, apiKey)
-    : "";
+    : { context: "", selectedSources: [] };
 
   const payload = {
     model: "anthropic/claude-3.5-haiku",
     max_tokens: MAX_OUTPUT_TOKENS,
     stream: false,
     messages: [
-      { role: "system", content: buildSystemPrompt(context) },
+      { role: "system", content: buildSystemPrompt(retrieval.context) },
       ...validation.cleaned,
     ],
   };
@@ -254,7 +362,12 @@ export async function handler(event) {
   }
 
   const upstreamJson = await upstream.json();
-  const assistantText = upstreamJson?.choices?.[0]?.message?.content;
+  const content = upstreamJson?.choices?.[0]?.message?.content;
+  const assistantText = typeof content === "string"
+    ? content
+    : Array.isArray(content)
+      ? content.map((part) => part?.text || "").join("").trim()
+      : "";
   if (typeof assistantText !== "string" || !assistantText.trim()) {
     return json(502, { error: "Upstream LLM response was empty" });
   }
@@ -264,6 +377,7 @@ export async function handler(event) {
     headers: {
       "content-type": "text/plain; charset=utf-8",
       "cache-control": "no-store",
+      "x-rag-sources": retrieval.selectedSources.join(","),
     },
     body: assistantText,
   };
