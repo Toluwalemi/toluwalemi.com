@@ -19,6 +19,8 @@ const MIN_HYBRID_SCORE = 0.22;
 const MIN_LEXICAL_SCORE = 0.18;
 const RAG_DEBUG = process.env.RAG_DEBUG === "true";
 const NO_CONTEXT_REPLY = "I don't have enough information in my knowledge base to answer that accurately.";
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 30;
 const STOPWORDS = new Set([
   "about", "after", "again", "also", "and", "any", "are", "been", "being", "both",
   "but", "can", "did", "does", "doing", "done", "each", "exactly", "for", "from",
@@ -28,9 +30,10 @@ const STOPWORDS = new Set([
   "timeline", "very", "what", "when", "where", "which", "while", "who", "with", "work",
   "worked", "your",
 ]);
+const rateLimitStore = new Map();
 
 function isAllowedOrigin(origin) {
-  if (!origin) return true;
+  if (!origin) return false;
 
   const allowedOrigins = new Set(
     [
@@ -44,6 +47,41 @@ function isAllowedOrigin(origin) {
   );
 
   return allowedOrigins.has(origin);
+}
+
+function getClientIp(event) {
+  const header = event.headers?.["x-nf-client-connection-ip"]
+    || event.headers?.["X-Nf-Client-Connection-Ip"]
+    || event.headers?.["x-forwarded-for"]
+    || event.headers?.["X-Forwarded-For"];
+  if (!header) return null;
+  return String(header).split(",")[0].trim() || null;
+}
+
+function checkRateLimit(clientIp) {
+  if (!clientIp) return { limited: false, remaining: RATE_LIMIT_MAX_REQUESTS };
+
+  const now = Date.now();
+  const windowStart = now - RATE_LIMIT_WINDOW_MS;
+  const existing = rateLimitStore.get(clientIp) || [];
+  const recent = existing.filter((timestamp) => timestamp > windowStart);
+
+  if (recent.length >= RATE_LIMIT_MAX_REQUESTS) {
+    const oldestInWindow = recent[0];
+    const retryAfterMs = Math.max(0, RATE_LIMIT_WINDOW_MS - (now - oldestInWindow));
+    return {
+      limited: true,
+      retryAfterSeconds: Math.ceil(retryAfterMs / 1000),
+      remaining: 0,
+    };
+  }
+
+  recent.push(now);
+  rateLimitStore.set(clientIp, recent);
+  return {
+    limited: false,
+    remaining: Math.max(0, RATE_LIMIT_MAX_REQUESTS - recent.length),
+  };
 }
 
 // Load knowledge base at cold start.
@@ -414,13 +452,42 @@ function json(statusCode, payload) {
 }
 
 export async function handler(event) {
+  const origin = event.headers?.origin || event.headers?.Origin || "";
+  if (event.httpMethod === "OPTIONS") {
+    if (!isAllowedOrigin(origin)) {
+      return json(403, { error: "Forbidden" });
+    }
+    return {
+      statusCode: 204,
+      headers: {
+        "cache-control": "no-store",
+      },
+      body: "",
+    };
+  }
+
   if (event.httpMethod !== "POST") {
     return json(405, { error: "Method not allowed" });
   }
 
-  const origin = event.headers?.origin || event.headers?.Origin || "";
   if (!isAllowedOrigin(origin)) {
     return json(403, { error: "Forbidden" });
+  }
+
+  const clientIp = getClientIp(event);
+  const rateLimit = checkRateLimit(clientIp);
+  if (rateLimit.limited) {
+    return {
+      statusCode: 429,
+      headers: {
+        "content-type": "application/json",
+        "cache-control": "no-store",
+        "retry-after": String(rateLimit.retryAfterSeconds || 60),
+      },
+      body: JSON.stringify({
+        error: "Too many requests. Please try again shortly.",
+      }),
+    };
   }
 
   const body = parseBody(event);
@@ -451,7 +518,6 @@ export async function handler(event) {
       headers: {
         "content-type": "text/plain; charset=utf-8",
         "cache-control": "no-store",
-        "x-rag-sources": "",
       },
       body: replyWithoutContext(latestUserMessage.content),
     };
@@ -480,7 +546,11 @@ export async function handler(event) {
 
   if (!upstream.ok) {
     const details = await upstream.text();
-    return json(502, { error: "Upstream LLM request failed", details });
+    console.error("[chat] upstream failure", {
+      status: upstream.status,
+      bodyPreview: details.slice(0, 500),
+    });
+    return json(502, { error: "Upstream LLM request failed" });
   }
 
   const upstreamJson = await upstream.json();
@@ -499,7 +569,6 @@ export async function handler(event) {
     headers: {
       "content-type": "text/plain; charset=utf-8",
       "cache-control": "no-store",
-      "x-rag-sources": retrieval.selectedSources.join(","),
     },
     body: assistantText,
   };
