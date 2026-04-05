@@ -59,7 +59,7 @@ function getClientIp(event) {
 }
 
 function checkRateLimit(clientIp) {
-  if (!clientIp) return { limited: false, remaining: RATE_LIMIT_MAX_REQUESTS };
+  if (!clientIp) return { limited: false };
 
   const now = Date.now();
   const windowStart = now - RATE_LIMIT_WINDOW_MS;
@@ -72,16 +72,12 @@ function checkRateLimit(clientIp) {
     return {
       limited: true,
       retryAfterSeconds: Math.ceil(retryAfterMs / 1000),
-      remaining: 0,
     };
   }
 
   recent.push(now);
   rateLimitStore.set(clientIp, recent);
-  return {
-    limited: false,
-    remaining: Math.max(0, RATE_LIMIT_MAX_REQUESTS - recent.length),
-  };
+  return { limited: false };
 }
 
 // Load knowledge base at cold start.
@@ -269,12 +265,12 @@ function logRetrieval(question, selected, candidates) {
 // Return grounded context and retrieval metadata for the latest user question.
 async function retrieveContext(question, apiKey) {
   if (chunkIndex.length === 0) {
-    return { context: "", selectedSources: [] };
+    return { context: "" };
   }
 
   const questionTerms = tokenize(question);
   if (questionTerms.size === 0) {
-    return { context: "", selectedSources: [] };
+    return { context: "" };
   }
 
   let queryEmbedding;
@@ -324,7 +320,7 @@ async function retrieveContext(question, apiKey) {
   const bestThreshold = ranked[0]?.scoreThreshold || MIN_LEXICAL_SCORE;
   if (bestScore < bestThreshold) {
     logRetrieval(question, [], ranked);
-    return { context: "", selectedSources: [] };
+    return { context: "" };
   }
 
   const selected = selectDiverseTopK(ranked, RAG_TOP_K);
@@ -332,7 +328,6 @@ async function retrieveContext(question, apiKey) {
 
   return {
     context: buildContext(selected),
-    selectedSources: [...new Set(selected.map((s) => s.source))],
   };
 }
 
@@ -510,7 +505,7 @@ export async function handler(event) {
 
   const retrieval = latestUserMessage
     ? await retrieveContext(latestUserMessage.content, apiKey)
-    : { context: "", selectedSources: [] };
+    : { context: "" };
 
   if (latestUserMessage && !retrieval.context) {
     return {
