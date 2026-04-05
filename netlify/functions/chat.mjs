@@ -1,10 +1,7 @@
-import { readFileSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+// knowledge-base.json is bundled inline by esbuild at build time.
+// No readFileSync or import.meta.url needed — zero runtime file I/O.
+import knowledgeBaseData from "./knowledge-base.json" assert { type: "json" };
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-// API and guardrails
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_EMBED_URL = "https://openrouter.ai/api/v1/embeddings";
 const EMBEDDING_MODEL = "openai/text-embedding-3-small";
@@ -13,7 +10,7 @@ const MAX_MESSAGES = 20;
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_OUTPUT_TOKENS = 500;
 const ALLOWED_ROLES = new Set(["user", "assistant"]);
-const RAG_TOP_K = 3; // Number of knowledge chunks to inject per request
+const RAG_TOP_K = 3;
 
 function isAllowedOrigin(origin) {
   if (!origin) return true;
@@ -32,15 +29,9 @@ function isAllowedOrigin(origin) {
   return allowedOrigins.has(origin);
 }
 
-// Load knowledge base at cold start.
-let knowledgeBase = [];
-try {
-  const raw = readFileSync(join(__dirname, "knowledge-base.json"), "utf-8");
-  knowledgeBase = JSON.parse(raw);
-  console.log(`[RAG] Knowledge base loaded: ${knowledgeBase.length} chunks`);
-} catch {
-  console.warn("[RAG] No knowledge found. Running without RAG context.");
-}
+// Knowledge base bundled at build time — always available, zero cold-start cost.
+const knowledgeBase = Array.isArray(knowledgeBaseData) ? knowledgeBaseData : [];
+console.log(`[RAG] Knowledge base loaded: ${knowledgeBase.length} chunks`);
 
 // Cosine similarity for equal-length vectors.
 function cosineSimilarity(a, b) {
