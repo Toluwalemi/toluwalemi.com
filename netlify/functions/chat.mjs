@@ -2,9 +2,24 @@ import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
 
-const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const OPENROUTER_EMBED_URL = "https://openrouter.ai/api/v1/embeddings";
-const EMBEDDING_MODEL = "openai/text-embedding-3-small";
+const PROVIDERS = {
+  openrouter: {
+    chatCompletionsUrl: "https://openrouter.ai/api/v1/chat/completions",
+    embeddingsUrl: "https://openrouter.ai/api/v1/embeddings",
+    apiKeyEnvName: "OPENROUTER_API_KEY",
+    defaultHttpReferer: "https://toluwalemi.com",
+    defaultAppTitle: "Toluwalemi Digital Twin",
+  },
+};
+
+const LLM_PROVIDER = String(process.env.LLM_PROVIDER || "openrouter").trim().toLowerCase();
+const PROVIDER = PROVIDERS[LLM_PROVIDER] || null;
+const CHAT_COMPLETIONS_URL = process.env.CHAT_COMPLETIONS_URL || PROVIDER?.chatCompletionsUrl || "";
+const EMBEDDINGS_URL = process.env.EMBEDDINGS_URL || PROVIDER?.embeddingsUrl || "";
+const CHAT_MODEL = process.env.CHAT_MODEL || "anthropic/claude-3.5-haiku";
+const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL || "openai/text-embedding-3-small";
+const LLM_HTTP_REFERER = process.env.LLM_HTTP_REFERER || PROVIDER?.defaultHttpReferer || "";
+const LLM_APP_TITLE = process.env.LLM_APP_TITLE || PROVIDER?.defaultAppTitle || "";
 
 const MAX_MESSAGES = 20;
 const MAX_USER_MESSAGE_LENGTH = 500;
@@ -276,7 +291,7 @@ async function retrieveContext(question, apiKey) {
   let queryEmbedding;
   let embeddingFetchStatus = "not-requested";
   try {
-    const response = await fetch(OPENROUTER_EMBED_URL, {
+    const response = await fetch(EMBEDDINGS_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -493,9 +508,19 @@ export async function handler(event) {
     return json(400, { error: validation.error });
   }
 
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!PROVIDER) {
+    return json(500, {
+      error: `Unsupported LLM_PROVIDER "${LLM_PROVIDER}". Supported: ${Object.keys(PROVIDERS).join(", ")}`,
+    });
+  }
+
+  if (!CHAT_COMPLETIONS_URL || !EMBEDDINGS_URL) {
+    return json(500, { error: "Missing provider endpoint configuration" });
+  }
+
+  const apiKey = process.env.LLM_API_KEY || process.env[PROVIDER.apiKeyEnvName];
   if (!apiKey) {
-    return json(500, { error: "Missing OPENROUTER_API_KEY" });
+    return json(500, { error: `Missing LLM_API_KEY or ${PROVIDER.apiKeyEnvName}` });
   }
 
   // Use the most recent user message for retrieval.
@@ -519,7 +544,7 @@ export async function handler(event) {
   }
 
   const payload = {
-    model: "anthropic/claude-3.5-haiku",
+    model: CHAT_MODEL,
     max_tokens: MAX_OUTPUT_TOKENS,
     stream: false,
     messages: [
@@ -528,13 +553,13 @@ export async function handler(event) {
     ],
   };
 
-  const upstream = await fetch(OPENROUTER_API_URL, {
+  const upstream = await fetch(CHAT_COMPLETIONS_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": "https://toluwalemi.com",
-      "X-Title": "Toluwalemi Digital Twin",
+      "HTTP-Referer": LLM_HTTP_REFERER,
+      "X-Title": LLM_APP_TITLE,
     },
     body: JSON.stringify(payload),
   });

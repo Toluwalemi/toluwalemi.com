@@ -616,6 +616,44 @@ body {
   word-break: break-word;
 }
 
+.digital-twin-line--loading .digital-twin-line-prompt {
+  color: #8fcdff;
+}
+
+.digital-twin-loading-content {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  color: #a5bacf;
+}
+
+.digital-twin-loading-spinner {
+  color: #0cc471;
+  animation: twin-loading-pulse 0.9s steps(2, end) infinite;
+}
+
+.digital-twin-loading-label {
+  letter-spacing: 0.03em;
+}
+
+.digital-twin-loading-dots::after {
+  content: "...";
+  display: inline-block;
+  width: 0;
+  overflow: hidden;
+  animation: twin-loading-dots 1.1s steps(4, end) infinite;
+}
+
+@keyframes twin-loading-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@keyframes twin-loading-dots {
+  0% { width: 0; }
+  100% { width: 3ch; }
+}
+
 .digital-twin-separator {
   border: none;
   border-top: 1px dashed rgba(12, 196, 113, 0.2);
@@ -699,6 +737,14 @@ body {
 
 .dark-theme .digital-twin-line--assistant .digital-twin-line-prompt {
   color: #9bb7ff;
+}
+
+.dark-theme .digital-twin-line--loading .digital-twin-line-prompt {
+  color: #9bb7ff;
+}
+
+.dark-theme .digital-twin-loading-content {
+  color: #aeb6c2;
 }
 
 .dark-theme .digital-twin-input-row input {

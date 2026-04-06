@@ -11,8 +11,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const KNOWLEDGE_DIR = path.join(__dirname, "../netlify/functions/knowledge");
 const OUTPUT_FILE = path.join(__dirname, "../netlify/functions/knowledge-base.json");
 
-const OPENROUTER_EMBED_URL = "https://openrouter.ai/api/v1/embeddings";
-const EMBEDDING_MODEL = "openai/text-embedding-3-small";
+const EMBEDDINGS_URL = process.env.EMBEDDINGS_URL || "https://openrouter.ai/api/v1/embeddings";
+const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL || "openai/text-embedding-3-small";
 
 // Chunk config (character-based).
 const CHUNK_SIZE = 500;
@@ -56,7 +56,7 @@ function chunkText(text, source) {
 }
 
 async function embedBatch(texts, apiKey) {
-  const response = await fetch(OPENROUTER_EMBED_URL, {
+  const response = await fetch(EMBEDDINGS_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -81,10 +81,10 @@ async function embedBatch(texts, apiKey) {
 }
 
 async function main() {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.LLM_API_KEY || process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
-    console.error("❌  OPENROUTER_API_KEY is not set.");
-    console.error("    Run: OPENROUTER_API_KEY=your_key node scripts/embed.mjs");
+    console.error("❌  LLM_API_KEY or OPENROUTER_API_KEY is not set.");
+    console.error("    Run: LLM_API_KEY=your_key node scripts/embed.mjs");
     process.exit(1);
   }
 
